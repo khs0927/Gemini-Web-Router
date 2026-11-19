@@ -55,7 +55,11 @@
 
 1. **Aside (`u/0`, `u/1`, `u/2`, `u/3`)**:
    - `models.json` 내 `providers["gemini-web"]` (`http://127.0.0.1:8766/v1`) 등록 완료.
-2. **Claude Code (`aside-models` MCP & 서브에이전트)**:
+2. **Claude Code (`~/.claude.json` 전용 MCP & `ANTHROPIC_BASE_URL` 다이렉트 모드 & 서브에이전트)**:
+   - **전용 MCP 서버 (`mcp_server.py`)**: `C:\Users\USER\.claude.json`의 `mcpServers["gemini-web"]`에 등록 완료 (`gemini_web_ask`, `gemini_web_quota`, `gemini_web_models` 제공).
+   - **Claude Code CLI 전체를 Gemini Web 백엔드로 실행 (`claude-gemini-web.cmd`)**:
+     - `C:\Users\USER\.local\bin\claude-gemini-web.cmd` 및 프로젝트 루트 `claude-gemini-web.cmd` 제공.
+     - `ANTHROPIC_BASE_URL=http://127.0.0.1:8766`을 통해 Claude Code의 `/v1/messages` 및 `/v1/messages/count_tokens`, `thinking` 블록(`signature_delta`), `tool_use` / `tool_result` 루프, Auto-Continue Watchdog를 완벽 지원하며 `claude-opus-*`/`claude-sonnet-*`는 `gemini-4-carbon`으로, `claude-haiku-*`는 `gemini-4-hydrogen`으로 자동 라우팅.
    - `C:\Users\USER\.local\bin\aside-models-mcp.mjs`: `provider="gemini-web"` (별칭 `geminiweb`, `gweb`) 등록 완료.
    - `C:\Users\USER\.local\bin\openai-bridge.mjs` (포트 `8791`): `gemini-web/*` 다이렉트 프록시 연결 완료.
    - `C:\Users\USER\.claude\agents\gemini-web-agent.md` 및 `C:\Users\USER\.claude\CLAUDE.md` 등록 완료.

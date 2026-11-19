@@ -93,11 +93,24 @@ chmod +x register-startup.sh
 curl http://127.0.0.1:8766/v1/usage
 ```
 
-### 3. OpenCode / ZCode 원클릭 등록
-```powershell
-# OpenCode 등록 (~/.config/opencode/opencode.json)
-powershell -ExecutionPolicy Bypass -File .\configs\setup-opencode.ps1
+### 3. Claude Code / OpenCode / ZCode 원클릭 등록
 
-# ZCode 등록 (~/.zcode/v2/config.json)
-powershell -ExecutionPolicy Bypass -File .\configs\setup-zcode.ps1
-```
+`setup-any-pc.bat` (`register-startup.ps1`) 실행 시 아래 모든 에이전트에 자동으로 등록됩니다:
+
+- **Claude Code (`~/.claude.json`, `~/.claude/agents/gemini-web-agent.md`, `claude-gemini-web.cmd`)**:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\configs\setup-claude.ps1
+  ```
+  - **방식 1 (Claude Code 내 전용 MCP 도구)**: `mcp__gemini-web__gemini_web_ask`, `mcp__gemini-web__gemini_web_quota`, `mcp__gemini-web__gemini_web_models` 및 `mcp__aside-models__aside_ask(provider="gemini-web")`
+  - **방식 2 (Claude Code 서브에이전트)**: `@gemini-web-agent` 호출
+  - **방식 3 (Claude Code CLI 전체를 Gemini Web 백엔드로 실행)**:
+    ```cmd
+    claude-gemini-web
+    ```
+    (`ANTHROPIC_BASE_URL=http://127.0.0.1:8766`을 통해 `claude-opus-*`/`claude-sonnet-*` 요청은 `gemini-4-carbon`으로, `claude-haiku-*` 요청은 `gemini-4-hydrogen`으로 자동 매핑하며 `/v1/messages` 및 `/v1/messages/count_tokens` 완벽 지원)
+
+- **OpenCode / ZCode 등록**:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\configs\setup-opencode.ps1
+  powershell -ExecutionPolicy Bypass -File .\configs\setup-zcode.ps1
+  ```

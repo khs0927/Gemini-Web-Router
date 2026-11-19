@@ -65,6 +65,11 @@ if (Test-Path -LiteralPath $zcInstaller) {
     & $zcInstaller
 }
 
+$claudeInstaller = Join-Path $RootDir 'configs\setup-claude.ps1'
+if (Test-Path -LiteralPath $claudeInstaller) {
+    & $claudeInstaller
+}
+
 & $EnsureScript
 Start-Sleep -Seconds 2
 try {
