@@ -1,0 +1,8 @@
+gemini-webapi>=2.1.1
+fastapi>=0.115.0
+uvicorn>=0.30.0
+browser-cookie3>=0.20.1
+loguru>=0.7.2
+curl-cffi>=0.16.2
+orjson>=3.10.0
+pydantic>=2.10.0

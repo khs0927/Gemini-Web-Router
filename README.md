@@ -50,18 +50,43 @@
 
 ---
 
-## 🚀 실행 및 연동 방법
+## 🚀 실행 및 연동 방법 (어느 컴퓨터에서든 1클릭 자동 실행)
 
-### 1. 서버 시작 / 중지
+어떤 컴퓨터(Windows / macOS / Linux)에서든 클론 후 **단 한 번의 명령**만으로 Python 패키지 자동 설치, 부팅 시 무콘솔 자동 시작 등록, Aside/OpenCode/ZCode 공급자 등록까지 동일하게 완료됩니다.
+
+### 방법 A. Windows (어느 PC에서나 원클릭 설치 & 부팅 자동 실행 등록)
+```cmd
+git clone https://github.com/khs0927/Gemini-Web-Router.git
+cd Gemini-Web-Router
+setup-any-pc.bat
+```
+*(또는 PowerShell에서 `powershell -ExecutionPolicy Bypass -File .\register-startup.ps1` 실행)*
+
+`setup-any-pc.bat` (`register-startup.ps1`)이 자동으로 수행하는 작업:
+1. **동적 경로 및 Python 자동 탐색 (`ensure-router.ps1`)**: 사용자 계정명(`%USERPROFILE%`)이나 클론 위치에 상관없이 현재 폴더(`$PSScriptRoot`)와 시스템 Python 3.11+ 경로를 자동 감지하고, `requirements.txt` 패키지가 없으면 자동으로 설치합니다.
+2. **3중 부팅 자동 시작 & 무중단 워치독 등록**:
+   - **Windows 시작프로그램 폴더 VBS**: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\gemini-web-api-router.vbs`
+   - **레지스트리 자동 시작 (`HKCU\...\Run`)**: `GeminiWebApiRouter` 키 등록
+   - **작업 스케줄러 (`Gemini Web API Router`)**: 5분 주기 헬스 체크 및 자동 재기동 워치독 등록 (로컬 Mutex `Local\GeminiWebApiRouterEnsure`로 중복 실행 완벽 방지)
+3. **에이전트 공급자 자동 병합**: Aside(`u/0`~`u/3`), OpenCode, ZCode 설정 파일에 `gemini-web` 공급자를 자동 등록합니다.
+4. **자동 시작 해제**: `powershell -ExecutionPolicy Bypass -File .\unregister-startup.ps1`
+
+### 방법 B. macOS / Linux (부팅 시 `launchd` / `systemd` 데몬 자동 실행)
+```bash
+git clone https://github.com/khs0927/Gemini-Web-Router.git
+cd Gemini-Web-Router
+chmod +x register-startup.sh
+./register-startup.sh
+```
+
+### 수동 서버 시작 / 중지
 - **백그라운드 데몬 보장 실행 (무콘솔)**:
   ```powershell
   powershell -ExecutionPolicy Bypass -File .\ensure-router.ps1
   ```
 - **수동 배치 실행 / 중지**:
-  - 시작: `start-server.bat` (최소화 실행: `start-server.bat /min`)
-  - 중지: `stop-server.bat`
-- **통합 라우터 자동 기동**:
-  - `Unified-API-Routers\start-unified-routers.ps1`의 9번 서비스(포트 `8766`)로 등록되어 부팅 시 자동 실행됩니다.
+  - 시작: `start-server.bat` (최소화 실행: `start-server.bat /min`) / `./start-server.sh`
+  - 중지: `stop-server.bat` / `./stop-server.sh`
 
 ### 2. 실시간 사용량 조회
 ```bash

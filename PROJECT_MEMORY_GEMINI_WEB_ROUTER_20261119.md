@@ -61,5 +61,11 @@
    - `C:\Users\USER\.claude\agents\gemini-web-agent.md` 및 `C:\Users\USER\.claude\CLAUDE.md` 등록 완료.
 3. **OpenCode & ZCode**:
    - `gemini-web-local` 공급자 자동 병합 완료 (`configs/setup-opencode.ps1`, `configs/setup-zcode.ps1`).
-4. **부팅 시 자동 시작**:
-   - `C:\Users\USER\.gemini\antigravity\scratch\Unified-API-Routers\start-unified-routers.ps1` 9번 항목으로 등록 완료.
+4. **부팅 시 자동 시작 & 멀티 PC 포터블 설치 (`setup-any-pc.bat` / `register-startup.ps1` / `register-startup.sh`)**:
+   - **어느 컴퓨터에서든 동일 동작**: 하드코딩된 경로 없이 `$PSScriptRoot` 상대 경로와 동적 Python 탐색(`Find-PythonExe`) 및 `requirements.txt` 자동 부트스트랩을 수행.
+   - **Windows 4중 자동 기동 보장**:
+     1. Windows 시작프로그램 폴더: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\gemini-web-api-router.vbs`
+     2. Windows 레지스트리 Run 키: `HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\GeminiWebApiRouter`
+     3. Windows 작업 스케줄러: `Gemini Web API Router` (5분 주기 워치독)
+     4. 통합 라우터 런처: `C:\Users\USER\.gemini\antigravity\scratch\Unified-API-Routers\start-unified-routers.ps1` 9번 항목
+   - **macOS / Linux 지원**: `register-startup.sh`를 통해 macOS `launchd` (`~/Library/LaunchAgents/com.antigravity.gemini-web-router.plist`) 및 Linux `systemd --user` 서비스 자동 등록.
