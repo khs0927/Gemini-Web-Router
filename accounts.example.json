@@ -1,0 +1,9 @@
+{
+  "accounts": [
+    {
+      "label": "account-1",
+      "secure_1psid": "PASTE_YOUR___Secure-1PSID_HERE",
+      "secure_1psidts": "PASTE_YOUR___Secure-1PSIDTS_HERE"
+    }
+  ]
+}

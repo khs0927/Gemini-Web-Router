@@ -1,0 +1,110 @@
+{
+  "providers": {
+    "gemini-web": {
+      "id": "gemini-web",
+      "name": "Gemini Web Router (gemini.google.com)",
+      "baseUrl": "http://127.0.0.1:8766/v1",
+      "apiKey": "local-dev-token",
+      "api": "openai-completions",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "gemini-4-carbon",
+          "name": "Gemini 4 Carbon (Code & Complex Tasks · Web)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "low",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "xhigh"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "gemini-4-neon",
+          "name": "Gemini 4 Neon (Deep Analysis · Web)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "low",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "xhigh"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "gemini-4-hydrogen",
+          "name": "Gemini 4 Hydrogen (Fast Daily · Web)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "low",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "xhigh"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false
+          }
+        },
+        {
+          "id": "gemini-auto",
+          "name": "Gemini Auto Mode (Dynamic Router · Web)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "low",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "xhigh"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false
+          }
+        }
+      ]
+    }
+  }
+}
