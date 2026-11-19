@@ -49,6 +49,11 @@ TOOLS = [
                     "enum": ["low", "medium", "high", "xhigh"],
                     "description": "Optional thinking effort level",
                 },
+                "images": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of local image file paths (.png, .jpg, .webp) or data:image/... base64 URLs to attach",
+                },
             },
             "required": ["prompt"],
         },
@@ -106,15 +111,34 @@ def call_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
         return {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
 
     if name == "gemini_web_ask":
+        import base64
+        import mimetypes
+        from pathlib import Path
+
         prompt = args.get("prompt") or ""
         model = args.get("model") or "gemini-4-carbon"
         system = args.get("system")
         effort = args.get("reasoning_effort")
+        images = args.get("images") or []
 
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": prompt})
+
+        if images and isinstance(images, list):
+            user_content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
+            for img_item in images:
+                img_str = str(img_item).strip()
+                if img_str.startswith(("data:image/", "http://", "https://")):
+                    user_content.append({"type": "image_url", "image_url": {"url": img_str}})
+                elif os.path.isfile(img_str):
+                    p = Path(img_str)
+                    mime = mimetypes.guess_type(p.name)[0] or "image/png"
+                    b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+                    user_content.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
+            messages.append({"role": "user", "content": user_content})
+        else:
+            messages.append({"role": "user", "content": prompt})
 
         payload: dict[str, Any] = {
             "model": model,
