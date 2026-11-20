@@ -73,3 +73,28 @@
      3. Windows 작업 스케줄러: `Gemini Web API Router` (5분 주기 워치독)
      4. 통합 라우터 런처: `C:\Users\USER\.gemini\antigravity\scratch\Unified-API-Routers\start-unified-routers.ps1` 9번 항목
    - **macOS / Linux 지원**: `register-startup.sh`를 통해 macOS `launchd` (`~/Library/LaunchAgents/com.antigravity.gemini-web-router.plist`) 및 Linux `systemd --user` 서비스 자동 등록.
+
+---
+
+## 5. v1.3.0 속도 최적화 · URL 깨짐 수정 · 끊김 없는 연속 응답 해결 (2026-11-20)
+
+1. **Aside `gemini-4-carbon` URL 도구 호출 실패 (`[https://...](https://...)` & 거부) 원인 및 해결**:
+   - **원인 1**: Gemini Web UI가 도구 인자(JSON/JS 코드) 내 URL을 마크다운 링크 `[https://...](https://...)`로 자동 치환하고 32자리 16진수 ID를 축약해 Aside `repl`(`openTab`)이 `Invalid url: "https://[https://..."` 오류를 4회 연속 발생시키고 결국 URL 접근 거부로 종료됨(`2026-11-20_8DjyFrc86LSyfquz` 세션 확인).
+   - **원인 2**: 기존 프롬프트의 `"PROTOCOL OVERRIDE"`, `"PROXY"`, `"on the user's local PC"` 표현과 `temporary=False` 세션 모드가 Gemini Web의 환경 정직성 거부(`I don't have direct access...`) 및 `gemini_webapi`의 90초 `read_chat` 폴링 대기를 유발.
+   - **해결**:
+     - `_unwrap_markdown_links_in_text()` / `_unwrap_urls_in_value()`로 도구 인자 내 마크다운 링크 언랩핑 및 `source_urls` 접두사 기반 전체 URL/16진수 ID 복원.
+     - `_normalize_tools()`에 `_format_compact_signature()`를 적용하고 호스트 함수 호출 프롬프트를 비적대적 인터페이스 형식으로 정제, `<ElicitationsGroup>` 태그 제거(`_strip_gemini_ui_artifacts`), URL/도구 거부 패턴 확장(`PREMATURE_STOP_PATTERNS`) 및 `_recover_response()` 자동 복구 연동.
+     - 기본값을 무상태 `temporary=True` (`GEMINI_SESSION_CACHE=false`)로 전환해 `read_chat` 90초 스톨 제거 (`GEMINI_SESSION_CACHE=true`로 옵트인 가능).
+2. **호출 속도 최적화**:
+   - `ensure_init()` 3회 재시도 + 45초 `_keepalive_loop()`로 사용자 요청의 콜드 스타트 지연 방지.
+   - `_install_rpc_speed_patches()`: 매 요청 앞뒤에서 블로킹되던 `_sync_activity()`를 90초 쓰로틀, `_fetch_usage_info()`를 30초 TTL 비동기 백그라운드로 전환.
+   - Windows `ABOVE_NORMAL_PRIORITY_CLASS` 승격 + `orjson` 직렬화 + OpenAI SSE 홀드백(`96/180`자) + 8초 `: keepalive` / Anthropic `/v1/messages` 8초 `event: ping` 유지.
+3. **짧은 답변/조기 중단 방지 (연속 답변 보장)**:
+   - `[Completeness & Continuity Guideline]` 삽입 + `_needs_auto_continuation()`으로 미완성 코드 펜스(홀수 ```` ``` ````), `"계속할까요?"` 문구(`CONTINUATION_OFFER_RE`), 장문 요청 대비 단문(<240자) 중단 감지 시 무상태 연속 생성(`_build_stateless_continuation_prompt`, 최대 `GEMINI_AUTO_CONTINUE_ROUNDS=3`회) 자동 이어쓰기.
+4. **멀티모달 & Claude Code 도구 결과 이미지 지원**:
+   - OpenAI `image_url` 및 Anthropic `tool_result` 내 `image` 블록을 확장자(`.png`/`.jpg`/`.webp`/`.gif`) 포함 임시 파일로 변환해 Vision 입력 지원.
+5. **E2E 검증 결과 (`2026-11-20` 실측, `router.py` v1.3.0)**:
+   - `gemini-4-carbon` URL 도구 호출: 비스트리밍 **6.78초**, 스트리밍 **3.70초** (`repl` `openTab` 원본 URL/전체 16진수 무손실), 2턴 요약 **4.32초**.
+   - `gemini-4-hydrogen` 비도구 스트리밍: `finish_reason=stop`, **9,617자**(`fences=8`), TTFT **9.38초** / 총 **26.05초**.
+   - Anthropic `/v1/messages` SSE (`claude-sonnet-4-6`): **0.00초** `message_start`, **4.28초** 완료 (`stop_reason=tool_use`, `Read`).
+   - Vision PNG (`64x64` 빨간 이미지): **11.05초** 정상 판별.

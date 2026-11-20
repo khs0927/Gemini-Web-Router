@@ -27,8 +27,13 @@
   - `gemini.google.com`의 5시간 쿼터(`2,400 크레딧/5h`) 및 주간 쿼터(`48,380 크레딧/주`)를 실시간 추적합니다.
   - 모든 응답 헤더에 `X-Gemini-Remaining-5h`, `X-Gemini-Remaining-Weekly`, `X-Gemini-Resolved-Model`을 포함합니다.
   - 5시간 잔여 크레딧이 25 미만으로 떨어지면 `gemini-4-carbon`/`gemini-4-neon` 요청을 자동으로 경량 `gemini-4-hydrogen`으로 폴백하여 쿼터 고갈을 방지합니다.
-- **무상태 임시 채팅 GC (`temporary=True`)**:
-  - 모든 API 요청을 임시 채팅(`temporary=True`) 및 완료 즉시 `delete_chat`으로 처리하여 `gemini.google.com` 왼쪽 사이드바 대화 기록이 지저분하게 쌓이지 않습니다.
+- **무상태 임시 채팅 GC (`temporary=True`) & 빠른 연속 이어쓰기**:
+  - 모든 API 요청을 무상태 임시 채팅(`temporary=True`, `session_cache_enabled=false` 기본값)으로 처리해 `gemini.google.com` 사이드바 기록 누적 및 `read_chat` 90초 대기 현상을 방지합니다.
+  - 비도구 장문 답변이 코드 블록 미종료 또는 `"계속할까요?"` 등으로 조기 중단될 경우 무상태 연속 이어쓰기(`GEMINI_AUTO_CONTINUE_ROUNDS=3`)가 자동 작동해 끝까지 완성합니다.
+- **v1.3.0 호출 속도 최적화 · URL 마크다운 언랩핑 · 차단/단축 응답 복구**:
+  - `Windows ABOVE_NORMAL` 프로세스 우선순위 + `orjson` 직렬화 + `_sync_activity`(90초 쓰로틀) 및 `_fetch_usage_info`(30초 TTL 백그라운드 비동기) 패치 + `_format_compact_signature` 스키마 압축 + 스트리밍 low-latency 홀드백(`96/180`자) + 8초 `: keepalive` / Anthropic `event: ping` 탑재.
+  - `gemini.google.com`이 도구 JSON 내부 URL을 `[https://...](https://...)` 마크다운 링크로 자동 변환하거나 긴 16진수 ID를 축약하는 현상을 `_unwrap_markdown_links_in_text()`로 자동 복원합니다.
+  - URL 접근 거부/단축 중단/네이티브 `<ElicitationsGroup>` 응답 발생 시 즉시 자동 복구(`_recover_response`)하며, 이미지 Base64(`.png`/`.jpg`/`.webp`/`.gif`)는 확장자 포함 임시 파일로 변환해 Vision 멀티모달을 완벽 지원합니다.
 - **에이전트 도구 호출 (Tool Calling) & 추론 (`reasoning_content`)**:
   - `<aside_tool_call>` 프로토콜 브릿지를 통해 OpenCode / ZCode / Cursor / Aside 에이전트의 `tools` 및 `tool_calls`를 지원합니다.
   - Gemini 웹의 사고 과정(`thoughts` / `thoughts_delta`)을 OpenAI 표준 `reasoning_content` 및 Anthropic `thinking` 블록으로 실시간 스트리밍합니다.
